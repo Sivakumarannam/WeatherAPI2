@@ -1,0 +1,51 @@
+{% extends 'dummy.html' %}
+
+{% block title %}
+<title>Weather Search</title>
+{% endblock %}
+
+{% block body_block %}
+<div class="container mt-5 pt-4">
+    <h1 class="mb-4">Search Weather</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" class="form-control" required>
+        </div>
+        <br>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    {% if error_message %}
+    <div class="alert alert-danger mt-4" role="alert">
+        {{ error_message }}
+    </div>
+    {% elif weather_data %}
+    <div class="mt-4">
+        <h2 class="text-center">Weather Data for {{ weather_data.city }}</h2>
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>Temperature</th>
+                    <td>{{ weather_data.temperature }} °C</td>
+                </tr>
+                <tr>
+                    <th>Humidity</th>
+                    <td>{{ weather_data.humidity }}%</td>
+                </tr>
+                <tr>
+                    <th>Weather</th>
+                    <td>{{ weather_data.weather }}</td>
+                </tr>
+                <tr>
+                    <th>Wind Speed</th>
+                    <td>{{ weather_data.speed }} m/s</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

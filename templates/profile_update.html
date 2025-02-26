@@ -1,0 +1,14 @@
+{% extends "dummy.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4 pt-5">
+    <h2>Update Profile</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }} {# This will render all fields, including 'address' if it's in the form #}
+        <button type="submit" class="btn btn-success">Save Changes</button>
+        <a href="{% url 'profile_display' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

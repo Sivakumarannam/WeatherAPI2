@@ -1,0 +1,110 @@
+{% extends 'dummy.html' %}
+
+{% block body_block %}
+<div class="container mt-5 pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow p-4">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">User Registration</h4>
+                </div>
+                <div class="card-body">
+
+                    <!-- Display Messages -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show"
+                        role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <!-- Registration Form -->
+                    <form method="POST" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            {{ user_form.username }}
+                            {% if user_form.username.errors %}
+                            <small class="text-danger">{{ user_form.username.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            {{ user_form.email }}
+                            {% if user_form.email.errors %}
+                            <small class="text-danger">{{ user_form.email.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            {{ user_form.password }}
+                            {% if user_form.password.errors %}
+                            <small class="text-danger">{{ user_form.password.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            {{ user_form.confirm_password }}
+                            {% if user_form.confirm_password.errors %}
+                            <small class="text-danger">{{ user_form.confirm_password.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Profile Picture</label>
+                            {{ profile_form.profile_pic }}
+                            {% if profile_form.profile_pic.errors %}
+                            <small class="text-danger">{{ profile_form.profile_pic.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            {{ profile_form.address }}
+                            {% if profile_form.address.errors %}
+                            <small class="text-danger">{{ profile_form.address.errors.0 }}</small>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Register</button>
+                    </form>
+
+                    <!-- Login Link -->
+                    <div class="text-center mt-3">
+                        <p>Already have an account?
+                            <a href="{% url 'user_login' %}" class="custom-link">Login here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+    .custom-link {
+        text-decoration: none;
+        color: blue;
+    }
+
+    .custom-link:hover {
+        text-decoration: underline;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .btn-primary {
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}

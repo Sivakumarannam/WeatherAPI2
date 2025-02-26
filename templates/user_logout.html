@@ -1,0 +1,27 @@
+{% extends 'dummy.html' %}
+
+{% block title %}
+<title>Logout</title>
+{% endblock %}
+
+{% block body_block %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg rounded">
+                <div class="card-body p-4 text-center">
+                    <h2 class="card-title text-danger">Are you sure you want to logout?</h2>
+                    <p class="text-muted">You will need to log in again to access your account.</p>
+
+                    <form method="POST" action="{% url 'user_logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger w-100">Logout</button>
+                    </form>
+
+                    <a href="{% url 'home' %}" class="btn btn-secondary mt-3 w-100">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

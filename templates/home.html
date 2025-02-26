@@ -1,0 +1,55 @@
+{% extends 'dummy.html' %}
+
+{% block title %}
+<title>Home Page</title>
+{% endblock %}
+
+{% block body_block %}
+<div class="container mt-5 pt-5">
+    {% if username %}
+    <div class="alert alert-success" role="alert">
+        <h1 class="display-4">Welcome to Home Page, Mr/Ms {{ username }}</h1>
+    </div>
+    {% else %}
+    <div class="alert alert-primary" role="alert">
+        <h1 class="display-4">Welcome to Home Page</h1>
+    </div>
+    {% endif %}
+
+    <h1 class="mb-4">Stored Cities</h1>
+
+    <ul class="list-group">
+        {% for city in city_names %}
+        <li class="list-group-item">{{ city }}</li>
+        {% empty %}
+        <li class="list-group-item">No cities available</li>
+        {% endfor %}
+    </ul>
+
+    {% if search_weather_data %}
+    <div class="mt-4">
+        <h2 class="text-center">Weather Data for {{ search_weather_data.city }}</h2>
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>Temperature</th>
+                    <td>{{ search_weather_data.temperature }} K</td>
+                </tr>
+                <tr>
+                    <th>Humidity</th>
+                    <td>{{ search_weather_data.humidity }}%</td>
+                </tr>
+                <tr>
+                    <th>Weather</th>
+                    <td>{{ search_weather_data.weather }}</td>
+                </tr>
+                <tr>
+                    <th>Wind Speed</th>
+                    <td>{{ search_weather_data.speed }} m/s</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
