@@ -418,9 +418,7 @@ def verify_otp(request):
 
         else:
             return JsonResponse({'success': False, 'message': 'Invalid or expired OTP!'})
-
-
-
+        
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Profile
@@ -448,24 +446,24 @@ def profile_update(request):
 
 
 
-import os
+# import os
 
-import requests
+# import requests
 
-API_KEY = os.getenv("AQI_API_KEY")  # Store this securely
-CITY = "hyderabad"
-URL = f"https://api.waqi.info/feed/{CITY}/?token={API_KEY}"
+# API_KEY = os.getenv("AQI_API_KEY")  # Store this securely
+# CITY = "hyderabad"
+# URL = f"https://api.waqi.info/feed/{CITY}/?token={API_KEY}"
 
-response = requests.get(URL)
-data = response.json()
+# response = requests.get(URL)
+# data = response.json()
 
-if data["status"] == "ok":
-    aqi = data["data"]["aqi"]
-    city = data["data"]["city"]["name"]
-    updated_time = data["data"]["time"]["s"]
-    print(f"Air Quality in {city}: AQI {aqi} (Last updated: {updated_time})")
-else:
-    print("Error fetching air quality data.")
+# if data["status"] == "ok":
+#     aqi = data["data"]["aqi"]
+#     city = data["data"]["city"]["name"]
+#     updated_time = data["data"]["time"]["s"]
+#     print(f"Air Quality in {city}: AQI {aqi} (Last updated: {updated_time})")
+# else:
+#     print("Error fetching air quality data.")
 
 
 
