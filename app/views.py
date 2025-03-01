@@ -337,14 +337,19 @@ from django.contrib.auth.decorators import login_required
 from .models import Profile
 from .forms import ProfileForm  # You'll create this form next
 @login_required
+@login_required
 def profile_update(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
+        print(request.FILES)  # Debug: Check if image is being uploaded
+        
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect("profile_display")  # Redirect back to profile page
+            return redirect("profile_display")
+        else:
+            print(form.errors)  # Debugging form errors
 
     else:
         form = ProfileForm(instance=profile)

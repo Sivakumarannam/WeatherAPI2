@@ -4,14 +4,17 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
+from cloudinary.models import CloudinaryField
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile", blank=True, null=True)
-    address=models.TextField(blank=True, null=True)
-    profile_pic=models.ImageField(upload_to='images', blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    profile_pic = CloudinaryField('image', blank=True, null=True)
+
     def __str__(self):
-        return f"{self.user.username} Profile"
+        return self.user.username if self.user else "No User Assigned"
 
-
+    
 class WeatherData(models.Model):
     username=models.ForeignKey(User,on_delete=models.CASCADE,default=0)
     city = models.CharField(max_length=100)
