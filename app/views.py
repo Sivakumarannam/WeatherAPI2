@@ -17,22 +17,92 @@ from django.conf import settings
 import logging
 # Create your views here.
 
-
+import os
+import requests
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import WeatherData
+# Default city for initial air quality display
+DEFAULT_CITY = "Hyderabad"
 
 def home(request):
+    """Render home page with stored cities and live air quality for last selected city"""
     username = request.session.get('username')
-    city_names = WeatherData.objects.values_list('city', flat=True).distinct()
 
-    # Fetch user profile safely
-    user_profile = None
-    if request.user.is_authenticated:
-        user_profile = Profile.objects.filter(user=request.user).first()  # Use 'user' instead of 'profile_user'
+    # Fetch all stored city names (DOES NOT CHANGE WITH AJAX)
+    city_names = list(WeatherData.objects.values_list('city', flat=True).distinct())
+
+    # Select a random city every request
+    selected_city = random.choice(city_names) if city_names else DEFAULT_CITY
+    request.session["selected_city"] = selected_city
+
+    # Fetch air quality for selected city
+    air_quality_data = get_air_quality_data(selected_city)
 
     return render(request, 'home.html', {
         'username': username,
-        'city_names': city_names,
-        'user_profile': user_profile
+        'city_names': city_names,  # 🚀 This remains fixed and unchanged
+        'selected_city': selected_city,
+        'air_quality': air_quality_data["aqi"],
+        'air_quality_color': air_quality_data["color"]
     })
+
+
+def get_air_quality_data(city):
+    """ Fetch air quality data from AQICN API """
+    api_key = os.getenv("AQI_API_KEY")
+
+    if not api_key:
+        return {"city": city, "aqi": "--", "color": "gray"}
+
+    url = f"https://api.waqi.info/feed/{city}/?token={api_key}"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+
+        if data["status"] == "ok":
+            aqi = data["data"]["aqi"]
+            return {"city": city, "aqi": aqi, "color": get_aqi_color(aqi)}
+
+    except requests.exceptions.RequestException:
+        return {"city": city, "aqi": "--", "color": "gray"}
+
+    return {"city": city, "aqi": "--", "color": "gray"}
+
+
+def get_aqi_color(aqi):
+    """ Ensure AQI is always an integer before comparing """
+    try:
+        aqi = int(aqi)  # Convert to integer
+    except ValueError:
+        return "gray"  # Default color for invalid AQI
+
+    if aqi <= 50:
+        return "green"
+    elif aqi <= 100:
+        return "yellowgreen"
+    elif aqi <= 200:
+        return "orange"
+    elif aqi <= 300:
+        return "red"
+    else:
+        return "purple"
+
+
+
+def get_air_quality(request):
+    """ API endpoint for AJAX air quality updates (Random City Every 30s) """
+    city_names = list(WeatherData.objects.values_list('city', flat=True).distinct())
+    selected_city = random.choice(city_names) if city_names else DEFAULT_CITY
+
+    # Fetch air quality for requested city
+    air_quality_data = get_air_quality_data(selected_city)
+
+    return JsonResponse(air_quality_data)
+
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -156,18 +226,18 @@ def profile_display(request):
 
 
 
-
-
 @login_required
 def search(request):
     weather_data = None
     error_message = None
+    climate_warning = None
+    warning_color = "black"
 
     if request.method == 'POST':
         city_name = request.POST.get('city')
         if city_name:
-            api_key = '30d4741c779ba94c470ca1f63045390a'  # Consider moving this to a settings file
-            url = f'http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}'
+            we_api_key = os.getenv("WEA_API_KEY")  # Replace with your actual OpenWeather API key
+            url = f'http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={we_api_key}'
 
             try:
                 response = requests.get(url)
@@ -179,6 +249,14 @@ def search(request):
                 humidity = data['main']['humidity']
                 weather = data['weather'][0]['description']
                 speed = data['wind']['speed']
+
+                # Check if the weather is bad or good
+                if temperature > 30 or humidity > 80:
+                    climate_warning = "You are not going outside because of climate changes."
+                    warning_color = "red"
+                else:
+                    climate_warning = "You are going outside now."
+                    warning_color = "green"
 
                 # Save data to WeatherData model
                 username = request.session.get('username')
@@ -205,18 +283,29 @@ def search(request):
                 }
 
                 # Render search page with updated data
-                return render(request, 'search.html', {'weather_data': {
-                    'city': city_name,
-                    'temperature': temperature,
-                    'humidity': humidity,
-                    'weather': weather,
-                    'speed': speed
-                }, 'error_message': error_message})
+                return render(request, 'search.html', {
+                    'weather_data': {
+                        'city': city_name,
+                        'temperature': temperature,
+                        'humidity': humidity,
+                        'weather': weather,
+                        'speed': speed
+                    },
+                    'climate_warning': climate_warning,
+                    'warning_color': warning_color,
+                    'error_message': error_message
+                })
 
             except requests.exceptions.RequestException as e:
                 error_message = f'Error fetching weather data: {e}'
 
-    return render(request, 'search.html', {'weather_data': weather_data, 'error_message': error_message})
+    return render(request, 'search.html', {
+        'weather_data': weather_data,
+        'climate_warning': climate_warning,
+        'warning_color': warning_color,
+        'error_message': error_message
+    })
+
 
 
 
@@ -355,3 +444,28 @@ def profile_update(request):
         form = ProfileForm(instance=profile)
 
     return render(request, "profile_update.html", {"form": form})
+
+
+
+
+import os
+
+import requests
+
+API_KEY = os.getenv("AQI_API_KEY")  # Store this securely
+CITY = "hyderabad"
+URL = f"https://api.waqi.info/feed/{CITY}/?token={API_KEY}"
+
+response = requests.get(URL)
+data = response.json()
+
+if data["status"] == "ok":
+    aqi = data["data"]["aqi"]
+    city = data["data"]["city"]["name"]
+    updated_time = data["data"]["time"]["s"]
+    print(f"Air Quality in {city}: AQI {aqi} (Last updated: {updated_time})")
+else:
+    print("Error fetching air quality data.")
+
+
+

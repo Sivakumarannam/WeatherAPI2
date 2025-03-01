@@ -5,6 +5,15 @@
 {% endblock %}
 
 {% block body_block %}
+<style>
+    .climate-warning {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: red;
+        /* Default color */
+    }
+</style>
+
 <div class="container mt-5 pt-4">
     <h1 class="mb-4">Search Weather</h1>
 
@@ -46,6 +55,14 @@
             </tbody>
         </table>
     </div>
+
+<!-- ✅ Climate Warning Section -->
+{% if climate_warning %}
+<div class="alert mt-4 text-center climate-warning" style="color: {{ warning_color|default:" red" }};">
+    <strong>{{ climate_warning }}</strong>
+</div>
+{% endif %}
+
     {% endif %}
 </div>
 {% endblock %}

@@ -6,50 +6,82 @@
 
 {% block body_block %}
 <div class="container mt-5 pt-5">
+    <!-- ✅ Welcome Section -->
     {% if username %}
-    <div class="alert alert-success" role="alert">
-        <h1 class="display-4">Welcome to Home Page, Mr/Ms {{ username }}</h1>
+    <div class="alert alert-success text-center" role="alert" style="background-color: #d4ede2; border-radius: 12px;">
+        <h1 class="display-5">Welcome, {{ username }}</h1>
     </div>
     {% else %}
-    <div class="alert alert-primary" role="alert">
-        <h1 class="display-4">Welcome to Home Page</h1>
+    <div class="alert alert-primary text-center" role="alert">
+        <h1 class="display-5">Welcome to WeatherApp</h1>
     </div>
     {% endif %}
 
-    <h1 class="mb-4">Stored Cities</h1>
+    <div class="row mt-4">
+        <!-- ✅ Stored Cities Section -->
+        <div class="col-md-8">
+            <h2 class="fw-bold">Stored Cities</h2>
+            <ul class="list-group shadow-sm">
+                {% for city in city_names %}
+                <li class="list-group-item">{{ city }}</li>
+                {% empty %}
+                <li class="list-group-item">No cities available</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-    <ul class="list-group">
-        {% for city in city_names %}
-        <li class="list-group-item">{{ city }}</li>
-        {% empty %}
-        <li class="list-group-item">No cities available</li>
-        {% endfor %}
-    </ul>
+        <!-- ✅ Air Quality Section -->
+        <div class="col-md-4">
+            <div class="card text-center shadow-lg mt-3"
+                style="background-color: #222; color: white; border-radius: 12px;">
+                <div class="card-body">
+                    <h5 class="card-title" style="font-size: 1.4rem;">Air Quality</h5>
+                    <p class="small" id="city_name" style="color: white; margin-bottom: 5px;">{{ selected_city }}</p>
 
-    {% if search_weather_data %}
-    <div class="mt-4">
-        <h2 class="text-center">Weather Data for {{ search_weather_data.city }}</h2>
-        <table class="table table-bordered">
-            <tbody>
-                <tr>
-                    <th>Temperature</th>
-                    <td>{{ search_weather_data.temperature }} K</td>
-                </tr>
-                <tr>
-                    <th>Humidity</th>
-                    <td>{{ search_weather_data.humidity }}%</td>
-                </tr>
-                <tr>
-                    <th>Weather</th>
-                    <td>{{ search_weather_data.weather }}</td>
-                </tr>
-                <tr>
-                    <th>Wind Speed</th>
-                    <td>{{ search_weather_data.speed }} m/s</td>
-                </tr>
-            </tbody>
-        </table>
+                    <p class="card-text" style="font-size: 2rem;">
+                        <span id="aqi_value" class="fw-bold">{{ air_quality|default:"--" }}</span>
+                    </p>
+
+                    <!-- ✅ AQI Indicator -->
+                    <div id="aqi_indicator" class="rounded-circle mx-auto"
+                        style="width: 25px; height: 25px; background-color: {{ air_quality_color|default:'gray' }};">
+                    </div>
+
+                    <p class="mt-2" style="color: lightgray; font-size: 0.9rem;">
+                        Updating every 30 seconds...
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endif %}
 </div>
+
+<!-- ✅ JavaScript for Auto-Update AQI -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    console.log("✅ JavaScript Loaded!");
+
+    function fetchAirQuality() {
+        console.log("🔄 Fetching new air quality data...");
+
+        $.ajax({
+            url: "{% url 'get_air_quality' %}",
+            type: "GET",
+            success: function (data) {
+                console.log("✅ API Response:", data);
+                $("#aqi_value").text(data.aqi);
+                $("#aqi_indicator").css("background-color", data.color);
+                $("#city_name").text(data.city);
+            },
+            error: function (xhr, status, error) {
+                console.error("❌ Error:", status, error);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        fetchAirQuality();
+        setInterval(fetchAirQuality, 30000);
+    });
+</script>
 {% endblock %}

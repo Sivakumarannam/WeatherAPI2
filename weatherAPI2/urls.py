@@ -42,4 +42,5 @@ urlpatterns = [
     path('verify_otp/', verify_otp, name='verify_otp'),
     path('profile_update/', views.profile_update, name='profile_update'),
     path("healthz/", health_check),  # Health check endpoint
+    path('get_air_quality/', get_air_quality, name='get_air_quality'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # Serve media files
